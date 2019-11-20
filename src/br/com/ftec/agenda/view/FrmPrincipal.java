@@ -19,6 +19,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class FrmPrincipal extends javax.swing.JFrame {
     DefaultTableModel dftm;
+    int IdContato;
 
     /**
      * Creates new form FrmPrincipal
@@ -77,24 +78,34 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         btnExcluir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/ftec/agenda/view/imagens/x-button.png"))); // NOI18N
         btnExcluir.setText("Excluir");
+        btnExcluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcluirActionPerformed(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3"
+                "Title 1", "Title 2", "Title 3", "Título 4"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(jTable1);
@@ -181,13 +192,15 @@ public class FrmPrincipal extends javax.swing.JFrame {
     public void montaTabelaPrincipal() throws ClassNotFoundException, SQLException{
        dftm = (DefaultTableModel) jTable1.getModel();
        dftm.setNumRows(0);
-       jTable1.getColumnModel().getColumn(0).setHeaderValue("nome");
-       jTable1.getColumnModel().getColumn(1).setHeaderValue("Email");
-       jTable1.getColumnModel().getColumn(2).setHeaderValue("Telefone");
+       jTable1.getColumnModel().getColumn(0).setHeaderValue("Id");
+       jTable1.getColumnModel().getColumn(1).setHeaderValue("nome");
+       jTable1.getColumnModel().getColumn(2).setHeaderValue("Email");
+       jTable1.getColumnModel().getColumn(3).setHeaderValue("Telefone");
        
        ContatoDAO cdao = new ContatoDAO();
        for(Contato c : cdao.listarcontatos()){
            dftm.addRow(new Object[]{
+               c.getId(),
                c.getNome(),
                c.getEmail(),
                c.getTelefone()
@@ -206,6 +219,10 @@ public class FrmPrincipal extends javax.swing.JFrame {
         ContatoDAO cdao = new ContatoDAO();
         try {
             cdao.SalvarContato(c);
+            montaTabelaPrincipal();
+             txtEmail.setText("");
+            txtNome.setText("");
+            txtTelefone.setText("");
             JOptionPane.showMessageDialog(null,"salvo com sucesso" );
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
@@ -215,6 +232,53 @@ public class FrmPrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null,"Erro ao salvar SQL Exception!!!" );
         }
     }//GEN-LAST:event_btnSalvarActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        // TODO add your handling code here:
+        int linha =jTable1.getSelectedRow();
+        int valor =(int)jTable1.getValueAt(linha, 0);
+        ContatoDAO cdao = new ContatoDAO();
+        Contato contato;
+        try {
+            contato = cdao.listarcontatosPorId(valor);
+            txtNome.setText(contato.getNome());
+            txtEmail.setText(contato.getEmail());
+            txtTelefone.setText(contato.getTelefone());
+            IdContato = contato.getId();
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
+        
+        
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
+        // TODO add your handling code here:
+        Contato c = new Contato();
+        ContatoDAO cdao= new ContatoDAO();
+        c.setEmail(txtEmail.getText());
+        c.setNome(txtNome.getName());
+        c.setTelefone(txtTelefone.getText());
+        c.setId(IdContato);
+        try {
+            cdao.excluirContato(c.getId());
+            montaTabelaPrincipal();
+            txtEmail.setText("");
+            txtNome.setText("");
+            txtTelefone.setText("");
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showConfirmDialog(null, "erro ao Excluir");
+        } catch (SQLException ex) {
+            Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showConfirmDialog(null, "erro ao Excluir");
+        }
+        
+    }//GEN-LAST:event_btnExcluirActionPerformed
 
     /**
      * @param args the command line arguments

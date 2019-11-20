@@ -50,4 +50,41 @@ public class ContatoDAO {
         
        return listaContatos; 
     }
+    
+    public void excluirContato(int Id) throws ClassNotFoundException, SQLException{
+        
+        String sql = "delete from agenda where id="+Id;
+        Connection conn = null;
+        PreparedStatement pstm = null;
+        conn = Conexao.criaConexao();
+        pstm = conn.prepareStatement(sql);
+        pstm.executeUpdate();
+        
+        
+    }
+
+    public Contato listarcontatosPorId(int valor) throws ClassNotFoundException, SQLException {
+         String sql = "Select * from agenda where Id="+valor;//ordenar por nome
+        
+        Connection conn = null;//classe que aux para conexâo aqui tudo é java
+        PreparedStatement pstm = null;//
+        ResultSet rset = null;//
+        
+        
+        conn = Conexao.criaConexao();
+        pstm = conn.prepareStatement(sql);//?o que faz PrepareS...
+        rset = pstm.executeQuery();
+       Contato contato = new Contato();
+        while(rset.next()){
+            
+        contato.setId(rset.getInt("Id"));
+        contato.setNome(rset.getString("nome"));
+        contato.setEmail(rset.getString("email"));
+        contato.setTelefone(rset.getString("telefone"));
+        
+            
+        }
+        
+       return contato; 
+    }
 }
